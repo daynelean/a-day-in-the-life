@@ -6,14 +6,17 @@ ThisBuild / organization     := "com.example"
 ThisBuild / organizationName := "example"
 
 val http4sVersion = "0.20.11"
+val circeVersion = "0.11.1"
 
 lazy val root = (project in file("."))
   .settings(
     name := "a-day-in-the-life",
     libraryDependencies ++= Seq(
       scalaTest % Test,
-      "io.circe" %% "circe-literal" % "0.11.1" % Test,
-      "io.circe" %% "circe-generic" % "0.11.1",
+      "org.slf4j" % "slf4j-simple" % "1.7.28", // for aws sdk
+      "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.640",
+      "io.circe" %% "circe-literal" % circeVersion % Test,
+      "io.circe" %% "circe-generic" % circeVersion,
       "org.http4s" %% "http4s-blaze-client" % http4sVersion,
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
@@ -24,3 +27,6 @@ lazy val root = (project in file("."))
   )
 
 scalacOptions ++= Seq("-Ypartial-unification")
+
+Compile /run / fork := true
+Compile /run / javaOptions += "-Dorg.slf4j.simpleLogger.defaultLogLevel=debug"
