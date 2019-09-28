@@ -6,10 +6,11 @@ import cats.implicits._
 import com.example.day.InquireService.inquireApp
 import com.example.day.Queue.{createQueue, sendMessage, sqsClient}
 import com.example.day.model.Inquiry
-import org.http4s.HttpApp
-import org.http4s.server.blaze.BlazeServerBuilder
-import io.circe.syntax._
 import io.circe.generic.auto._
+import io.circe.syntax._
+import org.http4s.HttpApp
+import org.http4s.server.blaze.BlazeServerBuilder;
+
 
 
 object Main extends IOApp {

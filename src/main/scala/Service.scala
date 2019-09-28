@@ -14,7 +14,7 @@ final case class InquireService(saveAction: Inquiry => EitherT[IO, Throwable, Un
 
 case object InquireService {
 
-  def log(s: String): IO[Unit] = IO.pure(println(s))
+  def log(s: String): IO[Unit] = IO.apply(println(s))
 
   def apply(saveAction: Inquiry => EitherT[IO, Throwable, Unit]): InquireService = new InquireService(saveAction)
 
