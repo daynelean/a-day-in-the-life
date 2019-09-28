@@ -13,7 +13,7 @@ import org.http4s.server.blaze.BlazeServerBuilder;
 
 
 
-object Main extends IOApp {
+object Webhook extends IOApp {
 
   def mkApp(queueMessage: String => IO[Unit]): HttpApp[IO] = {
     def saveAction(inquiry: Inquiry): EitherT[IO, Throwable, Unit] =
