@@ -1,6 +1,8 @@
 package com.example.day
 
+import cats.data.EitherT
 import cats.effect.IO
+import cats.implicits._
 import com.example.day.model.Inquiry
 import io.circe.generic.auto._
 import org.http4s.circe.jsonOf
@@ -8,16 +10,18 @@ import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.{EntityDecoder, HttpApp, HttpRoutes, Response}
 
-final case class InquireService(saveAction: Inquiry => IO[Boolean])
+final case class InquireService(saveAction: Inquiry => EitherT[IO, Throwable, Unit])
 
 case object InquireService {
 
-  def apply(saveAction: Inquiry => IO[Boolean]): InquireService = new InquireService(saveAction)
+  def log(s: String): IO[Unit] = IO.pure(println(s))
+
+  def apply(saveAction: Inquiry => EitherT[IO, Throwable, Unit]): InquireService = new InquireService(saveAction)
 
   private implicit val decoder: EntityDecoder[IO, Inquiry] = jsonOf[IO, Inquiry]
 
   private def handlePost(service: InquireService)(inquiry: Inquiry): IO[Response[IO]] =
-    service.saveAction(inquiry).flatMap(if (_) Accepted() else InternalServerError())
+    service.saveAction(inquiry).foldF(e => log(e.getMessage()) *> InternalServerError(), _ => Accepted())
 
   def inquireApp(service: InquireService): HttpApp[IO] =
     HttpRoutes.of[IO] {
