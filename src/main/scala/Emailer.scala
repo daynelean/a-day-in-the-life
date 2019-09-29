@@ -1,6 +1,6 @@
 package com.example.day
 
-import cats.effect.{ExitCode, IO, IOApp}
+import cats.effect.{ExitCode, IO, IOApp, Sync}
 import com.example.day.model.Inquiry
 
 object Emailer extends IOApp {
@@ -10,7 +10,7 @@ object Emailer extends IOApp {
     postcode.matches(localPattern)
   }
 
-  private def generateResponse(inquiry: Inquiry): IO[String] = {
+  private def generateResponse[F[_]: Sync](inquiry: Inquiry): F[String] = {
     if (postcodeIsLocal(inquiry.postcode)) Templates.yesTemplate(inquiry)
     else Templates.noTemplate(inquiry)
   }
