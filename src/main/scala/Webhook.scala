@@ -5,7 +5,8 @@ import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits._
 import com.example.day.app.InquireService
 import com.example.day.app.InquireService.inquireApp
-import com.example.day.data.SQS.{createQueue, sendMessage, sqsClient}
+import com.example.day.config.SqsConfig.loadConfig
+import com.example.day.data.SQS.{sendMessage, sqsClient}
 import com.example.day.model.Inquiry
 import com.example.day.model.Inquiry.inquiryEncoder
 import io.circe.syntax._
@@ -34,9 +35,9 @@ object Webhook extends IOApp {
   def run(args: List[String]): IO[ExitCode] = {
     val queueName: String = "queue"
     for {
-      sqs <- sqsClient()
-      qUrl <- createQueue(sqs, queueName)
-      httpServer <- mkHttpServer(mkApp(sendMessage[IO](sqs, qUrl)))
+      conf <- loadConfig()
+      sqs <- sqsClient(conf)
+      httpServer <- mkHttpServer(mkApp(sendMessage[IO](sqs, conf.queueUrl)))
     } yield (httpServer)
   }
 

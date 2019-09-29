@@ -2,6 +2,7 @@ package com.example.day
 
 import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits._
+import com.example.day.config.SqsConfig.loadConfig
 import com.example.day.data.SQS.{Message, deleteMessage, fetchMessages, sqsClient}
 import com.example.day.data.SES.sendMail
 import com.example.day.model.Inquiry
@@ -48,7 +49,8 @@ object Emailer extends IOApp {
   private def fetchAndProcessMessages[F[_]: Sync](): F[Unit] = {
     val queueName: String = "queue" // TODO, need the queueUrl
     for {
-      sqs <- sqsClient()
+      conf <- loadConfig()
+      sqs <- sqsClient(conf)
       msgs <- fetchMessages(sqs, queueName)
       _ <- msgs.traverse_(msg =>
               processMessage(msg) *>
@@ -58,6 +60,7 @@ object Emailer extends IOApp {
   }
 
   // TODO not sure if this is going to blow the stack.
+  // Need something like https://hackage.haskell.org/package/base-4.12.0.0/docs/Control-Monad.html#v:forever
   private def go(sleepTime: FiniteDuration): IO[Unit] =
     fetchAndProcessMessages[IO]() *> IO.sleep(sleepTime) *> go(sleepTime)
 
