@@ -59,15 +59,13 @@ object Emailer extends IOApp {
     } yield ()
   }
 
-  // TODO not sure if this is going to blow the stack.
-  // Need something like https://hackage.haskell.org/package/base-4.12.0.0/docs/Control-Monad.html#v:forever
   private def go(sleepTime: FiniteDuration): IO[Unit] =
-    fetchAndProcessMessages[IO]() *> IO.sleep(sleepTime) *> go(sleepTime)
+   fetchAndProcessMessages[IO]().flatMap(_ => IO.sleep(sleepTime)).flatMap(_ => go(sleepTime))
 
   def run(args: List[String]): IO[ExitCode] = {
     val sleepLength: Long = 10
     val sleepUnit: TimeUnit = scala.concurrent.duration.SECONDS
     val sleepTime: FiniteDuration = new FiniteDuration(sleepLength, sleepUnit)
-    go(sleepTime).as(ExitCode.Success)
+    go(sleepTime).flatMap(_ => IO.pure(ExitCode.Success))
   }
 }
