@@ -9,6 +9,7 @@ val http4sVersion = "0.20.11"
 val circeVersion = "0.11.1"
 
 lazy val root = (project in file("."))
+  .enablePlugins(DockerPlugin, AssemblyPlugin)
   .settings(
     name := "a-day-in-the-life",
     libraryDependencies ++= Seq(
@@ -25,6 +26,25 @@ lazy val root = (project in file("."))
       "org.typelevel" %% "cats-core" % "2.0.0",
       "org.typelevel" %% "cats-effect" % "2.0.0",
       "org.scalatra.scalate" %% "scalate-core" % "1.9.4"
+    ),
+    dockerfile in docker := {
+      val artifact: File = assembly.value
+      val artifactTargetPath = s"/app/${artifact.name}"
+      new Dockerfile {
+        from("openjdk:13-alpine")
+        add(artifact, artifactTargetPath)
+        entryPoint("java", "-jar", artifactTargetPath)
+      }
+    },
+    imageNames in docker := Seq(
+      // Sets the latest tag
+      ImageName(s"${organization.value}/${name.value}:latest"),
+
+      // Sets a name with a tag that contains the project version
+      ImageName(
+        repository = name.value,
+        tag = Some("v" + version.value)
+      )
     )
   )
 
