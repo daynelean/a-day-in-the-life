@@ -3,8 +3,9 @@ package com.example.day
 import cats.data.EitherT
 import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits._
-import com.example.day.InquireService.inquireApp
-import com.example.day.Queue.{createQueue, sendMessage, sqsClient}
+import com.example.day.app.InquireService
+import com.example.day.app.InquireService.inquireApp
+import com.example.day.data.SQS.{createQueue, sendMessage, sqsClient}
 import com.example.day.model.Inquiry
 import com.example.day.model.Inquiry.inquiryEncoder
 import io.circe.syntax._
@@ -38,6 +39,5 @@ object Webhook extends IOApp {
       httpServer <- mkHttpServer(mkApp(sendMessage[IO](sqs, qUrl)))
     } yield (httpServer)
   }
-
 
 }

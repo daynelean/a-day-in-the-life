@@ -2,11 +2,14 @@ package com.example.day
 
 import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits._
-import com.example.day.Queue.{Message, deleteMessage, fetchMessages, sqsClient}
+import com.example.day.data.SQS.{Message, deleteMessage, fetchMessages, sqsClient}
 import com.example.day.data.SES.sendMail
 import com.example.day.model.Inquiry
 import com.example.day.model.Inquiry.inquiryDecoder
+import com.example.day.templates.Templates
 import io.circe.parser.decode
+
+import scala.concurrent.duration.{FiniteDuration, TimeUnit}
 
 object Emailer extends IOApp {
 
@@ -42,19 +45,26 @@ object Emailer extends IOApp {
     }
   }
 
-  private def foo[F[_]: Sync](): F[Unit] = {
+  private def fetchAndProcessMessages[F[_]: Sync](): F[Unit] = {
     val queueName: String = "queue" // TODO, need the queueUrl
     for {
       sqs <- sqsClient()
       msgs <- fetchMessages(sqs, queueName)
       _ <- msgs.traverse_(msg =>
-          processMessage(msg) *>
-          deleteMessage(sqs, queueName)(msg.getReceiptHandle())
+              processMessage(msg) *>
+              deleteMessage(sqs, queueName)(msg.getReceiptHandle())
       )
     } yield ()
   }
 
+  // TODO not sure if this is going to blow the stack.
+  private def go(sleepTime: FiniteDuration): IO[Unit] =
+    fetchAndProcessMessages[IO]() *> IO.sleep(sleepTime) *> go(sleepTime)
+
   def run(args: List[String]): IO[ExitCode] = {
-    IO.pure(ExitCode.Success)
+    val sleepLength: Long = 10
+    val sleepUnit: TimeUnit = scala.concurrent.duration.SECONDS
+    val sleepTime: FiniteDuration = new FiniteDuration(sleepLength, sleepUnit)
+    go(sleepTime).as(ExitCode.Success)
   }
 }

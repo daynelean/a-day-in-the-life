@@ -3,6 +3,8 @@ package com.example.day.data
 import cats.effect.Sync
 
 case object SES {
+
+  // TODO newtype
   type Email = String
   type Body = String
 

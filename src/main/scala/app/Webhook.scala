@@ -1,4 +1,4 @@
-package com.example.day
+package com.example.day.app
 
 import cats.data.EitherT
 import cats.effect.{IO, Sync}

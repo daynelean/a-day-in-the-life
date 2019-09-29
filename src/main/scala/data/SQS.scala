@@ -1,14 +1,15 @@
-package com.example.day // TODO rename
+package com.example.day.data
 
 import cats.effect.Sync
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.{AmazonSQS, AmazonSQSClientBuilder}
-import scala.collection.immutable.List
+
 import scala.collection.JavaConverters._
+import scala.collection.immutable.List
 
 
-case object Queue {
+case object SQS {
 
   // TODO newtype
   type QueueUrl = String
@@ -55,9 +56,8 @@ case object Queue {
   def deleteMessage[F[_]: Sync](sqs: AmazonSQS, queueUrl: QueueUrl)(receiptHandle: ReceiptHandle): F[Unit] =
     Sync[F].delay({
       println("about to delete message")
-      val r = sqs.deleteMessage(queueUrl, receiptHandle)
+      sqs.deleteMessage(queueUrl, receiptHandle)
       println("deleted message")
-      r
     })
 
 
