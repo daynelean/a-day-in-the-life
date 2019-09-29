@@ -1,13 +1,19 @@
-package com.example.day
+package com.example.day // TODO rename
 
 import cats.effect.Sync
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.client.builder.AwsClientBuilder
 import com.amazonaws.services.sqs.{AmazonSQS, AmazonSQSClientBuilder}
+import scala.collection.immutable.List
+import scala.collection.JavaConverters._
+
 
 case object Queue {
 
+  // TODO newtype
   type QueueUrl = String
+  type ReceiptHandle = String
+  type Message = com.amazonaws.services.sqs.model.Message
 
   // TODO move the configuration outside the app
   def sqsClient[F[_]: Sync](): F[AmazonSQS] =
@@ -37,5 +43,23 @@ case object Queue {
       println("sent message")
       println(r.toString())
     })
+
+  def fetchMessages[F[_]: Sync](sqs: AmazonSQS, queueUrl: QueueUrl): F[List[Message]] =
+    Sync[F].delay({
+      println("about to receive messages")
+      val r = sqs.receiveMessage(queueUrl).getMessages.asScala.toList
+      println(s"received ${r.size} messages")
+      r
+    })
+
+  def deleteMessage[F[_]: Sync](sqs: AmazonSQS, queueUrl: QueueUrl)(receiptHandle: ReceiptHandle): F[Unit] =
+    Sync[F].delay({
+      println("about to delete message")
+      val r = sqs.deleteMessage(queueUrl, receiptHandle)
+      println("deleted message")
+      r
+    })
+
+
 
 }

@@ -17,6 +17,7 @@ lazy val root = (project in file("."))
       "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.640",
       "io.circe" %% "circe-literal" % circeVersion % Test,
       "io.circe" %% "circe-generic" % circeVersion,
+      "io.circe" %% "circe-parser" % circeVersion,
       "org.http4s" %% "http4s-blaze-client" % http4sVersion,
       "org.http4s" %% "http4s-blaze-server" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
