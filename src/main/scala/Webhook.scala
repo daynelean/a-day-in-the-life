@@ -24,7 +24,7 @@ object Webhook extends IOApp {
 
   def mkHttpServer(app: HttpApp[IO]): IO[ExitCode] =
     BlazeServerBuilder[IO]
-      .bindHttp(8080, "localhost")
+      .bindHttp(8080, "0.0.0.0")
       .withHttpApp(app)
       .resource
       .use(_ => IO.never)
@@ -33,7 +33,6 @@ object Webhook extends IOApp {
   private implicit val F = Sync[IO]
 
   def run(args: List[String]): IO[ExitCode] = {
-    val queueName: String = "queue"
     for {
       conf <- loadConfig()
       sqs <- sqsClient(conf)

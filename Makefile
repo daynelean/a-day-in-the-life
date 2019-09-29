@@ -1,8 +1,8 @@
-run-sqs:
-	docker run -p 9324:9324 softwaremill/elasticmq
+build:
+	sbt docker
 
-run-emailer:
-	sbt "runMain com.example.day.Emailer"
+run: build
+	docker-compose up
 
-run-webhook:
-	sbt "runMain com.example.day.Webhook"
+stop:
+	docker-compose down

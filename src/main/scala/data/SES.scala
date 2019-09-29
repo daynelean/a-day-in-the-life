@@ -11,6 +11,6 @@ case object SES {
   def sendMail[F[_]: Sync](email: Email)(body: Body): F[Unit] = Sync[F].delay({
     val sleepInMillis: Long = 500
     Thread.sleep(sleepInMillis)
-     println(body)
+    println(body)
   })
 }

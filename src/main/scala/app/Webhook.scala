@@ -17,12 +17,14 @@ case object InquireService {
 
   def apply(saveAction: Inquiry => EitherT[IO, Throwable, Unit]): InquireService = new InquireService(saveAction)
 
-  private def log(s: String): IO[Unit] = IO.apply(println(s))
+  private def logError(t: Throwable): IO[Unit] = IO.apply({
+    println("[ERROR] " + t.getMessage())
+  })
 
   private implicit val decoder: EntityDecoder[IO, Inquiry] = jsonOf[IO, Inquiry](Sync[IO],inquiryDecoder)
 
   private def handlePost(service: InquireService)(inquiry: Inquiry): IO[Response[IO]] =
-    service.saveAction(inquiry).foldF(e => log(e.getMessage()) *> InternalServerError(), _ => Accepted())
+    service.saveAction(inquiry).foldF(e => logError(e) *> InternalServerError(), _ => Accepted())
 
   private def inquireRoutes(service: InquireService): HttpRoutes[IO] =
     HttpRoutes.of[IO] {

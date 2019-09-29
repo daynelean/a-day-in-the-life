@@ -3,8 +3,8 @@ package com.example.day
 import cats.effect.{ExitCode, IO, IOApp, Sync}
 import cats.implicits._
 import com.example.day.config.SqsConfig.loadConfig
-import com.example.day.data.SQS.{Message, deleteMessage, fetchMessages, sqsClient}
 import com.example.day.data.SES.sendMail
+import com.example.day.data.SQS.{Message, deleteMessage, fetchMessages, sqsClient}
 import com.example.day.model.Inquiry
 import com.example.day.model.Inquiry.inquiryDecoder
 import com.example.day.templates.Templates
@@ -25,7 +25,7 @@ object Emailer extends IOApp {
   }
 
   private def logError[F[_]: Sync](t: Throwable): F[Unit] = Sync[F].delay({
-    println("error" + t.getMessage())
+    println("[ERROR] " + t.getMessage())
   })
 
   private def processInquiry[F[_]: Sync](inquiry: Inquiry): F[Unit] =
@@ -47,14 +47,13 @@ object Emailer extends IOApp {
   }
 
   private def fetchAndProcessMessages[F[_]: Sync](): F[Unit] = {
-    val queueName: String = "queue" // TODO, need the queueUrl
     for {
       conf <- loadConfig()
       sqs <- sqsClient(conf)
-      msgs <- fetchMessages(sqs, queueName)
+      msgs <- fetchMessages(sqs, conf.queueUrl)
       _ <- msgs.traverse_(msg =>
               processMessage(msg) *>
-              deleteMessage(sqs, queueName)(msg.getReceiptHandle())
+              deleteMessage(sqs, conf.queueUrl)(msg.getReceiptHandle())
       )
     } yield ()
   }
@@ -63,7 +62,7 @@ object Emailer extends IOApp {
    fetchAndProcessMessages[IO]().flatMap(_ => IO.sleep(sleepTime)).flatMap(_ => go(sleepTime))
 
   def run(args: List[String]): IO[ExitCode] = {
-    val sleepLength: Long = 10
+    val sleepLength: Long = 1
     val sleepUnit: TimeUnit = scala.concurrent.duration.SECONDS
     val sleepTime: FiniteDuration = new FiniteDuration(sleepLength, sleepUnit)
     go(sleepTime).flatMap(_ => IO.pure(ExitCode.Success))

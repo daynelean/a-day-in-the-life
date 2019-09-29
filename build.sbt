@@ -14,7 +14,8 @@ lazy val root = (project in file("."))
     name := "a-day-in-the-life",
     libraryDependencies ++= Seq(
       scalaTest % Test,
-      "org.slf4j" % "slf4j-simple" % "1.7.28", // for aws sdk
+      // comment this out so libraries default to no op logging
+      //"org.slf4j" % "slf4j-simple" % "1.7.28", // for aws sdk
       "com.amazonaws" % "aws-java-sdk-sqs" % "1.11.640",
       "io.circe" %% "circe-literal" % circeVersion % Test,
       "io.circe" %% "circe-generic" % circeVersion,
