@@ -1,7 +1,9 @@
 package com.example.day
 
+import cats.data.EitherT
 import cats.effect.IO
-import com.example.day.InquireService.inquireApp
+import com.example.day.app.InquireService
+import com.example.day.app.InquireService.inquireApp
 import org.http4s._
 import org.scalatest._
 
@@ -9,7 +11,7 @@ class ServiceSpec extends FlatSpec {
   import ServiceSpec._
 
   val rootPath: Uri.Path = "/"
-  val inquirePath: Uri.Path = "/inquire"
+  val inquirePath: Uri.Path = "/1/inquire"
 
 
   "Service.inquireService " should " 404 " in {
@@ -62,8 +64,8 @@ case object ServiceSpec {
          "postcode": "abc"
        }"""
 
-  val successService: InquireService = InquireService(_ => IO.pure(true))
-  val failureService: InquireService = InquireService(_ => IO.pure(false))
+  val successService: InquireService = InquireService(_ => EitherT.rightT(()))
+  val failureService: InquireService = InquireService(_ => EitherT.leftT(new Exception))
 
   def get(service: InquireService, path: Uri.Path): org.http4s.Status =
     inquireApp(service)(Request[IO](Method.GET, Uri(path = path))).unsafeRunSync.status
