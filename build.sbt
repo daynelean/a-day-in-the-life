@@ -43,7 +43,7 @@ lazy val root = (project in file("."))
       // Sets a name with a tag that contains the project version
       ImageName(
         repository = name.value,
-        tag = Some("v" + version.value)
+        tag = git.gitHeadCommit.value
       )
     )
   )
