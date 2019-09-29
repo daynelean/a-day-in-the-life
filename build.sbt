@@ -33,7 +33,7 @@ lazy val root = (project in file("."))
       new Dockerfile {
         from("openjdk:13-alpine")
         add(artifact, artifactTargetPath)
-        entryPoint("java", "-jar", artifactTargetPath)
+        entryPoint("java", "-cp", artifactTargetPath)
       }
     },
     imageNames in docker := Seq(

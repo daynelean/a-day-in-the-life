@@ -1,0 +1,42 @@
+version: "3.7"
+services:
+
+  webhook:
+    image: com.example/a-day-in-the-life:latest # TODO use git hash
+    container_name: webhook
+    ports:
+      - '8080:8080'
+    command: "com.example.day.Webhook"
+    depends_on:
+      - sqs
+    restart: always
+    environment: # TODO remove dupe
+      SQS_ENDPOINT: 'http://sqs:9324'
+      SQS_REGION: 'elasticmq'
+      SQS_ACCESS_KEY: 'x'
+      SQS_SECRET_KEY: 'x'
+      SQS_QUEUE_URL: 'http://sqs:9324/queue/inquiries'
+
+  emailer:
+    image: com.example/a-day-in-the-life:latest # TODO use git hash
+    container_name: emailer
+    command: "com.example.day.Emailer"
+    depends_on:
+      - sqs
+    restart: always
+    environment: # TODO remove dupe
+      SQS_ENDPOINT: 'http://sqs:9324'
+      SQS_REGION: 'elasticmq'
+      SQS_ACCESS_KEY: 'x'
+      SQS_SECRET_KEY: 'x'
+      SQS_QUEUE_URL: 'http://sqs:9324/queue/inquiries'
+
+  sqs:
+    image: softwaremill/elasticmq:latest
+    container_name: sqs
+    expose:
+      - 9324
+    volumes:
+      - type: bind
+        source: './docker/elasticmq.conf'
+        target: '/opt/elasticmq.conf'
