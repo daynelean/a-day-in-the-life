@@ -1,12 +1,12 @@
 package com.example.day
 
 import cats.effect.{ExitCode, IO, IOApp, Sync}
-import com.example.day.Queue.{Message, deleteMessage, fetchMessages, sqsClient}
-import com.example.day.model.Inquiry
-import com.example.day.data.SES.sendMail
-import io.circe.parser.decode
-import io.circe.generic.auto._
 import cats.implicits._
+import com.example.day.Queue.{Message, deleteMessage, fetchMessages, sqsClient}
+import com.example.day.data.SES.sendMail
+import com.example.day.model.Inquiry
+import com.example.day.model.Inquiry.inquiryDecoder
+import io.circe.parser.decode
 
 object Emailer extends IOApp {
 
@@ -33,7 +33,7 @@ object Emailer extends IOApp {
     //
     // there's probably also a way to lift Either => Sync[F]
     // but I couldn't find it
-    decode[Inquiry](msg.getBody()) match {
+    decode[Inquiry](msg.getBody())(inquiryDecoder) match {
       case Left(e: io.circe.Error) =>
         Sync[F].raiseError(e)
 

@@ -1,5 +1,8 @@
 package com.example.day.model
 
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+
 final case class Inquiry(
                           firstName: String,
                           lastName: String,
@@ -17,5 +20,8 @@ case object Inquiry {
     "phone" -> i.phone,
     "postcode" -> i.postcode
   )
+
+  val inquiryDecoder: Decoder[Inquiry] = deriveDecoder
+  val inquiryEncoder: Encoder[Inquiry] = deriveEncoder
 
 }
